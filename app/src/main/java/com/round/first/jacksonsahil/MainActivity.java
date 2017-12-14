@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements AlbumAdapter.OnIt
             new AlbumAsyncTask().execute();
         } else {
             Toast.makeText(mContext, "Check your internet connection", Toast.LENGTH_SHORT).show();
+            Log.d("aaa","bbb");
         }
     }
 
