@@ -44,15 +44,7 @@ platform :android do
         lane :hockey_build do
            gradle(task: 'assemble', build_type: 'Debug')
 
-           value = get_version_name(
-                   #app_folder_name:"project"
-                   gradle_file_path:"app/build.gradle",
-                   ext_constant_name:"versionName"
-           )
-           puts "VALUE = #{value}"
-
            badge(glob: "/app/src/main/res/mipmap-*dpi/ic_launcher.{png,PNG}",
-           shield: "Version-#{value}-blue",
            no_badge: true)
 
            hockey(
