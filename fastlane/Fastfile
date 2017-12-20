@@ -1,0 +1,88 @@
+# Customize this file, documentation can be found here:
+# https://docs.fastlane.tools/actions/
+# All available actions: https://docs.fastlane.tools/actions
+# can also be listed using the `fastlane actions` command
+
+# Change the syntax highlighting to Ruby
+# All lines starting with a # are ignored when running `fastlane`
+
+# If you want to automatically update fastlane if a new version is available:
+# update_fastlane
+
+# This is the minimum version number required.
+# Update this, if you use features of a newer version
+min_fastlane_version("2.70.1")
+
+default_platform(:android)
+
+platform :android do
+  before_all do
+    # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+  end
+
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Submit a new Beta Build to Crashlytics Beta"
+  lane :beta do
+    gradle(task: "assembleRelease")
+    crashlytics
+
+    # sh "your_script.sh"
+    # You can also use other beta testing services here
+  end
+
+  desc "Deploy a new version to the Google Play"
+  lane :deploy do
+    gradle(task: "assembleRelease")
+    upload_to_play_store
+  end
+
+  desc "Upload a new Beta Build to Hockey App"
+        lane :hockey_build do
+           gradle(task: 'assemble', build_type: 'Debug')
+
+           value = get_version_name(
+                   #app_folder_name:"project"
+                   gradle_file_path:"app/build.gradle",
+                   ext_constant_name:"versionName"
+           )
+           puts "VALUE = #{value}"
+
+           badge(glob: "/app/src/main/res/mipmap-*dpi/ic_launcher.{png,PNG}",
+           shield: "Version-#{value}-blue",
+           no_badge: true)
+
+           hockey(
+              api_token: '8f6c93966a104a25b2ed74c417f89172',
+              notes_type: '0',
+              notes: changelog_from_git_commits(commits_count: '100',
+                                                pretty: '___ %h %s %n')
+           )
+     end
+
+  # You can define as many lanes as you want
+
+  after_all do |lane|
+    # This block is called, only if the executed lane was successful
+
+    # slack(
+    #   message: "Successfully deployed new App Update."
+    # )
+  end
+
+  error do |lane, exception|
+    # slack(
+    #   message: exception.message,
+    #   success: false
+    # )
+  end
+end
+
+# More information about multiple platforms in fastlane: https://docs.fastlane.tools/advanced/#control-configuration-by-lane-and-by-platform
+# All available actions: https://docs.fastlane.tools/actions
+
+# fastlane reports which actions are used. No personal data is recorded.
+# Learn more at https://docs.fastlane.tools/#metrics
